@@ -16,7 +16,7 @@ import org.springframework.statemachine.state.State;
 @EnableStateMachineFactory
 @Configuration
 @Slf4j
-public class StateMachineConfig extends StateMachineConfigurerAdapter<PaymentState, PaymentEvent> {
+public class StateMachineConfigurer extends StateMachineConfigurerAdapter<PaymentState, PaymentEvent> {
 
   @Override
   public void configure(StateMachineStateConfigurer<PaymentState, PaymentEvent> states) throws Exception {

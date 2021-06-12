@@ -10,7 +10,7 @@ import org.springframework.statemachine.StateMachine;
 import org.springframework.statemachine.config.StateMachineFactory;
 
 @SpringBootTest
-class StateMachineConfigTest {
+class StateMachineConfigurerTest {
 
   @Autowired
   StateMachineFactory<PaymentState, PaymentEvent> factory;
