@@ -41,7 +41,15 @@ public class StateMachineConfigurer extends
         .withExternal().source(PaymentState.NEW).target(PaymentState.PRE_AUTH)
         .event(PaymentEvent.PRE_AUTH_APPROVED).and()
         .withExternal().source(PaymentState.NEW).target(PaymentState.PRE_AUTH_ERROR)
-        .event(PaymentEvent.PRE_AUTH_DECLINED);
+        .event(PaymentEvent.PRE_AUTH_DECLINED)
+    // preAuth to Auth
+        .and()
+        .withExternal().source(PaymentState.PRE_AUTH).target(PaymentState.PRE_AUTH)
+        .event(PaymentEvent.AUTHORIZE).action(authorizeAction()).and()
+        .withExternal().source(PaymentState.PRE_AUTH).target(PaymentState.AUTH)
+        .event(PaymentEvent.AUTH_APPROVED).and()
+        .withExternal().source(PaymentState.PRE_AUTH).target(PaymentState.AUTH_ERROR)
+        .event(PaymentEvent.AUTH_DECLINED);
   }
 
   @Override
@@ -63,7 +71,7 @@ public class StateMachineConfigurer extends
    */
   public Action<PaymentState, PaymentEvent> preAuthAction() {
     return context -> {
-      log.info("PreAuth was called!");
+      log.info("PreAuth event has occurred!");
       if (new Random().nextInt(10) < 8) {
         System.out.println("Approved");
         context.getStateMachine()
@@ -74,6 +82,21 @@ public class StateMachineConfigurer extends
         context.getStateMachine()
             .sendEvent(MessageBuilder.withPayload(PaymentEvent.PRE_AUTH_DECLINED)
                 .build());
+      }
+    };
+  }
+
+  public Action<PaymentState, PaymentEvent> authorizeAction () {
+    return context -> {
+      log.info("Authorize event has occurred!");
+      if (new Random().nextInt(10) < 8) {
+        System.out.println("Approved");
+        context.getStateMachine()
+            .sendEvent(MessageBuilder.withPayload(PaymentEvent.AUTH_APPROVED).build());
+      } else {
+        System.out.println("Authorization declined!");
+        context.getStateMachine()
+            .sendEvent(MessageBuilder.withPayload(PaymentEvent.AUTH_DECLINED).build());
       }
     };
   }
