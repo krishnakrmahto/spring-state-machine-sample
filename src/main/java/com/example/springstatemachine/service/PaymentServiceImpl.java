@@ -17,10 +17,11 @@ import org.springframework.transaction.annotation.Transactional;
 @AllArgsConstructor
 public class PaymentServiceImpl implements PaymentService {
 
-  private static final String PAYMENT_ID_HEADER = "payment_id";
+  public static final String PAYMENT_ID_HEADER = "payment_id";
 
   private final PaymentRepository repository;
   private final StateMachineFactory<PaymentState, PaymentEvent> stateMachineFactory;
+  private final PaymentStateChangeInterceptor stateChangeInterceptor;
 
   @Transactional
   @Override
@@ -63,8 +64,10 @@ public class PaymentServiceImpl implements PaymentService {
     StateMachine<PaymentState, PaymentEvent> stateMachine = stateMachineFactory.getStateMachine(paymentId.toString());
     stateMachine.stop();
     stateMachine.getStateMachineAccessor()
-        .doWithAllRegions(accessor -> accessor.resetStateMachine(new DefaultStateMachineContext<>(
-            payment.getState(), null, null, null)));
+        .doWithAllRegions(accessor -> {
+          accessor.addStateMachineInterceptor(stateChangeInterceptor);
+          accessor.resetStateMachine(new DefaultStateMachineContext<>(payment.getState(), null, null, null));
+        });
 
     stateMachine.start();
 
